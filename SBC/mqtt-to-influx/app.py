@@ -6,9 +6,9 @@ import paho.mqtt.client as mqtt
 from influxdb_client import InfluxDBClient, Point
 
 
-MQTT_BROKER = os.getenv("MQTT_BROKER", "mosquitto")
+MQTT_BROKER = os.getenv("MQTT_BROKER")
 MQTT_PORT = int(os.getenv("MQTT_PORT", "1883"))
-MQTT_TOPIC = os.getenv("MQTT_TOPIC", "arduino/acceleration")
+MQTT_TOPIC_SENSOR_DATA = os.getenv("MQTT_TOPIC_SENSOR_DATA")
 
 INFLUX_URL = os.getenv("INFLUX_URL", "http://influxdb:8086")
 INFLUX_ORG = os.getenv("INFLUX_ORG", "ips")
@@ -18,10 +18,6 @@ INFLUX_TOKEN = os.getenv("INFLUX_TOKEN")
 
 print("Starting MQTT → InfluxDB service...", flush=True)
 
-
-# -------------------------
-# Connect to InfluxDB
-# -------------------------
 
 while True:
     try:
@@ -45,10 +41,6 @@ while True:
 
 write_api = influx_client.write_api()
 
-
-# -------------------------
-# MQTT callbacks
-# -------------------------
 
 def on_connect(client, userdata, flags, reason_code, properties):
     print(f"MQTT connection result: {reason_code}", flush=True)
@@ -104,10 +96,6 @@ def on_message(client, userdata, msg):
         )
 
 
-# -------------------------
-# MQTT client
-# -------------------------
-
 mqtt_client = mqtt.Client(
     mqtt.CallbackAPIVersion.VERSION2
 )
@@ -115,10 +103,6 @@ mqtt_client = mqtt.Client(
 mqtt_client.on_connect = on_connect
 mqtt_client.on_message = on_message
 
-
-# -------------------------
-# Connect to MQTT broker
-# -------------------------
 
 while True:
 
@@ -146,10 +130,6 @@ while True:
 
         time.sleep(3)
 
-
-# -------------------------
-# Start MQTT loop
-# -------------------------
 
 print("Starting MQTT loop...", flush=True)
 

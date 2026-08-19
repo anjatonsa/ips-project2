@@ -29,14 +29,25 @@ services:
     environment:
       MQTT_BROKER: mosquitto
       MQTT_PORT: 1883
-      MQTT_TOPIC: sensors/arduino
+      MQTT_TOPIC_SENSOR_DATA: ${MQTT_TOPIC_SENSOR_DATA}
 
       INFLUX_URL: http://influxdb:8086
-      INFLUX_ORG: iot
-      INFLUX_BUCKET: sensor_data
+      INFLUX_ORG: ${INFLUX_ORG}
+      INFLUX_BUCKET: ${INFLUX_BUCKET}
       INFLUX_TOKEN: ${INFLUX_TOKEN}
     restart: unless-stopped
 
+  read-from-arduino:
+    build: ./read_from_arduino
+    container_name: read-from-arduino
+    depends_on:
+      - mosquitto
+    environment:
+      MQTT_BROKER: mosquitto
+      MQTT_PORT: 1883
+      MQTT_TOPIC_SENSOR_DATA: ${MQTT_TOPIC_SENSOR_DATA}
+    restart: unless-stopped
+    
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
@@ -56,6 +67,6 @@ services:
     environment:
       MQTT_BROKER: mosquitto
       MQTT_PORT: 1883
-      MQTT_TOPIC: sensors/arduino
-      MQTT_COMMAND_TOPIC: actuator/command
+      MQTT_TOPIC_SENSOR_DATA: ${MQTT_TOPIC_SENSOR_DATA}
+      MQTT_COMMAND_TOPIC: 
     restart: unless-stopped
