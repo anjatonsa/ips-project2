@@ -1,0 +1,42 @@
+# Arduino
+*.hex
+*.elf
+*.bin
+*.map
+
+# Build folders
+build/
+out/
+
+# VS Code
+.vscode/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Environment / secrets
+.env
+
+# Logs
+*.log
+
+# InfluxDB
+influxdb/
+influxdb-data/
+*.bolt
+*.wal
+
+# Grafana
+grafana/
+grafana-data/
+grafana-storage/
+
+# Docker
+docker-compose.override.yml
+
+# OS files
+.DS_Store
+Thumbs.db
