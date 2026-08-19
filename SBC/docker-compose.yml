@@ -41,6 +41,8 @@ services:
     build: ./read_from_arduino
     container_name: read-from-arduino
     user: root
+    devices:
+      - "/dev/ttyACM0:/dev/ttyACM0"
     depends_on:
       - mosquitto
     environment:
