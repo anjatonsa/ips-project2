@@ -48,10 +48,10 @@ def on_connect(client, userdata, flags, reason_code, properties):
     if reason_code == 0:
         print("Connected to MQTT", flush=True)
 
-        client.subscribe(MQTT_TOPIC)
+        client.subscribe(MQTT_TOPIC_SENSOR_DATA)
 
         print(
-            f"Subscribed to topic: {MQTT_TOPIC}",
+            f"Subscribed to topic: {MQTT_TOPIC_SENSOR_DATA}",
             flush=True
         )
 
