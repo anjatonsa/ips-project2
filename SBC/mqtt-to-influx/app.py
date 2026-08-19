@@ -75,11 +75,15 @@ def on_message(client, userdata, msg):
             if isinstance(value, (int, float)):
                 point.field(key, value)
 
-
-        print(
-            "Data successfully stored in InfluxDB",
-            flush=True
-        )
+                write_api.write(
+                bucket=INFLUX_BUCKET,
+                org=INFLUX_ORG,
+                record=point
+                )
+                print(
+                    "Data successfully stored in InfluxDB",
+                    flush=True
+                )
 
     except json.JSONDecodeError as e:
 
