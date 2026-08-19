@@ -8,11 +8,11 @@ from influxdb_client import InfluxDBClient, Point
 
 MQTT_BROKER = os.getenv("MQTT_BROKER", "mosquitto")
 MQTT_PORT = int(os.getenv("MQTT_PORT", "1883"))
-MQTT_TOPIC = os.getenv("MQTT_TOPIC", "sensors/arduino")
+MQTT_TOPIC = os.getenv("MQTT_TOPIC", "arduino/acceleration")
 
 INFLUX_URL = os.getenv("INFLUX_URL", "http://influxdb:8086")
-INFLUX_ORG = os.getenv("INFLUX_ORG", "iot")
-INFLUX_BUCKET = os.getenv("INFLUX_BUCKET", "sensor_data")
+INFLUX_ORG = os.getenv("INFLUX_ORG", "ips")
+INFLUX_BUCKET = os.getenv("INFLUX_BUCKET", "acceleration_data")
 INFLUX_TOKEN = os.getenv("INFLUX_TOKEN")
 
 
@@ -83,11 +83,6 @@ def on_message(client, userdata, msg):
             if isinstance(value, (int, float)):
                 point.field(key, value)
 
-        write_api.write(
-            bucket=INFLUX_BUCKET,
-            org=INFLUX_ORG,
-            record=point
-        )
 
         print(
             "Data successfully stored in InfluxDB",
