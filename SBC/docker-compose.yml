@@ -40,6 +40,7 @@ services:
   read-from-arduino:
     build: ./read_from_arduino
     container_name: read-from-arduino
+    user: root
     depends_on:
       - mosquitto
     environment:
