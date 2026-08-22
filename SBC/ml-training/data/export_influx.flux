@@ -1,0 +1,5 @@
+from(bucket: "sensor_data")
+  |> range(start: time(v: "{start_time}"), stop: time(v: "{end_time}"))
+  |> filter(fn: (r) => r._measurement == "sensor_data")
+  |> pivot(rowKey: ["_time"], columnKey: ["_field"], valueColumn: "_value")
+  |> keep(columns: ["_time", "X", "Y", "Z"])

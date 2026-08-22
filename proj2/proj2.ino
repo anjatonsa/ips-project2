@@ -33,7 +33,7 @@ const int LIGHT_THRESHOLD = 120;
 
 // IMU reading interval
 unsigned long lastIMURead = 0;
-const unsigned long IMU_INTERVAL = 100;   // 100 ms
+const unsigned long IMU_INTERVAL = 50;  // 20 Hz
 
 
 /**
@@ -345,44 +345,47 @@ void loop()
         }
 
 
-        // =====================================================
-        // ACCELEROMETER
-        // =====================================================
+       
+    }
 
-        if(blinking)
-        {
-            if (IMU.accelerationAvailable()) {
+    // =====================================================
+    // ACCELEROMETER
+    // =====================================================
 
-                float x, y, z;
+    if(blinking && millis() - lastIMURead >= IMU_INTERVAL)
+    {
+        lastIMURead = millis();   
+        if (IMU.accelerationAvailable()) {
 
-                IMU.readAcceleration(
-                    x,
-                    y,
-                    z
+            float x, y, z;
+
+            IMU.readAcceleration(
+                x,
+                y,
+                z
+            );
+
+            float totalAcceleration =
+                sqrt(
+                    x * x +
+                    y * y +
+                    z * z
                 );
 
-                float totalAcceleration =
-                    sqrt(
-                        x * x +
-                        y * y +
-                        z * z
-                    );
+            Serial.print("X: ");
+            Serial.print(x, 3);
 
-                Serial.print("X: ");
-                Serial.print(x, 3);
+            Serial.print(" Y: ");
+            Serial.print(y, 3);
 
-                Serial.print(" Y: ");
-                Serial.print(y, 3);
+            Serial.print(" Z: ");
+            Serial.print(z, 3);
 
-                Serial.print(" Z: ");
-                Serial.print(z, 3);
-
-                Serial.print(" Total: ");
-                Serial.println(
-                    totalAcceleration,
-                    3
-                );
-            }
+            Serial.print(" Total: ");
+            Serial.println(
+                totalAcceleration,
+                3
+            );
         }
     }
 }

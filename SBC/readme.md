@@ -269,3 +269,20 @@ docker ps
 ```
 
 All containers should return to the running state automatically.
+
+
+Ml traing part
+
+1 record data
+2 convert to wide format call for each script - python transform_data.py data/collected/sample.csv data/transformed/sample.csv --label {normal/movement}
+3 call combine script -  python cmd_datasets.py data/transformed -o data/dataset_2s.csv
+
+python prepare_dataset.py data/dataset_2s.csv
+
+
+ML TRAING PART
+call export_influx.py for the sample data
+call prepare_data.py script
+
+
+python  transform_data.py  ./transformed ./collected/vibration.csv 1 ./collected/movement.csv 0 ./collected/still_vertical.csv 0 ./collected/still_horizontal.csv 0

@@ -3,8 +3,7 @@ import json
 import time
 
 import paho.mqtt.client as mqtt
-from influxdb_client import InfluxDBClient, Point
-
+from influxdb_client import InfluxDBClient, Point, SYNCHRONOUS
 
 MQTT_BROKER = os.getenv("MQTT_BROKER")
 MQTT_PORT = int(os.getenv("MQTT_PORT", "1883"))
@@ -39,7 +38,7 @@ while True:
     time.sleep(3)
 
 
-write_api = influx_client.write_api()
+write_api = influx_client.write_api(write_options=SYNCHRONOUS)
 
 
 def on_connect(client, userdata, flags, reason_code, properties):
@@ -57,48 +56,36 @@ def on_connect(client, userdata, flags, reason_code, properties):
 
 
 def on_message(client, userdata, msg):
-
     try:
         payload = msg.payload.decode("utf-8")
-
-        print(
-            f"Received MQTT message: {payload}",
-            flush=True
-        )
-
         data = json.loads(payload)
+
+        print(f"Received: {payload}", flush=True)
 
         point = Point("sensor_data")
 
+        has_fields = False
         for key, value in data.items():
-
             if isinstance(value, (int, float)):
-                point.field(key, value)
+                point.field(key, float(value))
+                has_fields = True
 
-                write_api.write(
-                bucket=INFLUX_BUCKET,
-                org=INFLUX_ORG,
-                record=point
-                )
-                print(
-                    "Data successfully stored in InfluxDB",
-                    flush=True
-                )
+        if not has_fields:
+            print("No numeric fields found, skipping", flush=True)
+            return
+
+        write_api.write(
+            bucket=INFLUX_BUCKET,
+            org=INFLUX_ORG,
+            record=point
+        )
+
+        print("Written to InfluxDB", flush=True)
 
     except json.JSONDecodeError as e:
-
-        print(
-            f"Invalid JSON received: {e}",
-            flush=True
-        )
-
+        print(f"Invalid JSON: {e}", flush=True)
     except Exception as e:
-
-        print(
-            f"Error processing MQTT message: {e}",
-            flush=True
-        )
-
+        print(f"Error: {e}", flush=True)
 
 mqtt_client = mqtt.Client(
     mqtt.CallbackAPIVersion.VERSION2
