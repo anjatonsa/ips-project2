@@ -15,11 +15,11 @@ SUB_TOPIC     = os.getenv("MQTT_TOPIC_SENSOR_DATA")
 PUB_TOPIC     = os.getenv("MQTT_COMMAND_TOPIC")
 
 WINDOW_SIZE   = 4     # must match training — 1 second at 4Hz
-N_FEATURES    = 4     # X, Y, Z, total
+N_FEATURES    = 3     # X, Y, Z
 THRESHOLD     = 0.5   # probability above this = vibration anomaly
 
 MODEL_PATH    = "/app/model.tflite"
-SCALER_PATH   = "/app/scaler.pkl"
+SCALER_PATH   = "/app/scaler.json"
 
 # ── Load model ────────────────────────────────────────────────────────────────
 print("[ML] Loading TFLite model...", flush=True)
@@ -36,7 +36,7 @@ print(f"[ML] Input shape  : {input_details[0]['shape']}", flush=True)
 print(f"[ML] Output shape : {output_details[0]['shape']}", flush=True)
 
 # ── Load scaler ───────────────────────────────────────────────────────────────
-with open("/app/scaler.json", "r") as f:
+with open(SCALER_PATH, "r") as f:
     scaler_params = json.load(f)
 
 scaler_mean  = np.array(scaler_params["mean"],  dtype=np.float32)
@@ -92,9 +92,8 @@ def on_message(client, userdata, msg):
         x = float(payload["X"])
         y = float(payload["Y"])
         z = float(payload["Z"])
-        total = float(np.sqrt(x**2 + y**2 + z**2))
 
-        buffer.append([x, y, z, total])
+        buffer.append([x, y, z])
 
         if len(buffer) < WINDOW_SIZE:
             print(f"[ML] Buffering {len(buffer)}/{WINDOW_SIZE}...", flush=True)

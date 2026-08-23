@@ -4,7 +4,7 @@ import argparse
 from pathlib import Path
 
 
-FEATURES = ["X", "Y", "Z", "total"]
+FEATURES = ["X", "Y", "Z"]#, "total"]
 WINDOW_SIZE = 4
 STEP = 2
 
@@ -24,7 +24,7 @@ def load_and_label(filepath, label):
     for col in ["X", "Y", "Z"]:
         df[col] = pd.to_numeric(df[col], errors="coerce")
 
-    df["total"] = np.sqrt(df["X"]**2 + df["Y"]**2 + df["Z"]**2)
+    #df["total"] = np.sqrt(df["X"]**2 + df["Y"]**2 + df["Z"]**2)
 
     df = df.dropna(subset=FEATURES)
     df = df.sort_values("_time")

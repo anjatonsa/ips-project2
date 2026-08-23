@@ -3,7 +3,7 @@ import numpy as np
 import tensorflow as tf
 
 WINDOW_SIZE = 4
-N_FEATURES  = 4   # X, Y, Z, total
+N_FEATURES  = 3   # X, Y, Z,
 
 # ── Load the trained Keras model ──────────────────────────────────────────────
 model = tf.keras.models.load_model("model.keras")

@@ -7,7 +7,7 @@ import tensorflow as tf
 import json
 # ── Config ────────────────────────────────────────────────────────────────────
 WINDOW_SIZE = 4
-N_FEATURES  = 4       # X, Y, Z, total
+N_FEATURES  = 3       # X, Y, Z, total
 EPOCHS      = 30
 BATCH_SIZE  = 16
 
