@@ -86,12 +86,10 @@ services:
     environment:
       MQTT_BROKER: mosquitto
       MQTT_PORT: "1883"
-      MQTT_TOPIC_SENSOR_DATA: sensors/arduino
-      MQTT_TOPIC_ACTUATOR: actuator/command
-      MQTT_TOPIC_CONFIG: ml/config
+      MQTT_TOPIC_SENSOR_DATA: ${MQTT_TOPIC_SENSOR_DATA}
+      MQTT_COMMAND_TOPIC: ${MQTT_COMMAND_TOPIC}
+      MQTT_TOPIC_CONFIG: ${MQTT_TOPIC_CONFIG}
       INFLUX_URL: http://influxdb:8086
       INFLUX_TOKEN: ${INFLUX_TOKEN}
-      INFLUX_ORG: ips
-      INFLUX_BUCKET: acceleration_data
-    networks:
-      - iot-net
+      INFLUX_ORG: ${INFLUX_ORG}
+      INFLUX_BUCKET: ${INFLUX_BUCKET}
