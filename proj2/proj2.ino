@@ -73,6 +73,8 @@ void setup()
     pinMode(LEDR, OUTPUT);
     digitalWrite(LEDR, HIGH); // Red LED OFF
 
+    pinMode(LEDG, OUTPUT);
+    digitalWrite(LEDG, HIGH); // Green LED OFF
 
     // ---------------------------------------------------------
     // APDS9960 LIGHT SENSOR
@@ -124,6 +126,21 @@ void setup()
  */
 void loop()
 {
+
+    if (Serial.available() > 0) {
+        String command = Serial.readStringUntil('\n');
+        command.trim();
+
+        if (command == "LED_ON") {
+            digitalWrite(LEDG, LOW);   // Green LED ON
+            Serial.println("ACK: LED_ON");
+        }
+        else if (command == "LED_OFF") {
+            digitalWrite(LEDG, HIGH);  // Green LED OFF
+            Serial.println("ACK: LED_OFF");
+        }
+    }
+
     // =========================================================
     // MICROPHONE / EDGE IMPULSE
     // =========================================================

@@ -5,9 +5,9 @@ WORKDIR /app
 ENV PYTHONUNBUFFERED=1
 
 COPY requirements.txt .
-
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY app.py .
+COPY model.tflite scaler.pkl ml_service.py .
 
-CMD ["python", "app.py"]
+CMD ["python", "ml_service.py"]
+
