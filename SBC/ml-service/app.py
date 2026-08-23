@@ -67,6 +67,11 @@ def run_inference():
     interpreter.invoke()
 
     prob = float(interpreter.get_tensor(output_idx)[0][0])
+    # ── TEMPORARY DEBUG ───────────────────────────────────────
+    print(f"[DEBUG] raw input:\n{raw}", flush=True)
+    print(f"[DEBUG] scaled input:\n{scaled}", flush=True)
+    print(f"[DEBUG] prob: {prob:.4f}", flush=True)
+    # ─────────────────────────────────────────────────────────
     return prob
 
 # ── MQTT callbacks ────────────────────────────────────────────────────────────
