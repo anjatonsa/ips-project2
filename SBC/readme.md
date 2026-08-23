@@ -286,3 +286,4 @@ call prepare_data.py script
 
 
 python  transform_data.py  ./transformed ./collected/vibration.csv 1 ./collected/movement.csv 0 ./collected/still_vertical.csv 0 ./collected/still_horizontal.csv 0
+

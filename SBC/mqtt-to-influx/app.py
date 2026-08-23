@@ -3,7 +3,8 @@ import json
 import time
 
 import paho.mqtt.client as mqtt
-from influxdb_client import InfluxDBClient, Point, SYNCHRONOUS
+from influxdb_client import InfluxDBClient, Point
+from influxdb_client.client.write_api import SYNCHRONOUS
 
 MQTT_BROKER = os.getenv("MQTT_BROKER")
 MQTT_PORT = int(os.getenv("MQTT_PORT", "1883"))
