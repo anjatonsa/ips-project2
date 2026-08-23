@@ -11,8 +11,8 @@ import tflite_runtime.interpreter as tflite
 # ── Config ────────────────────────────────────────────────────────────────────
 MQTT_BROKER   = os.getenv("MQTT_BROKER", "mosquitto")
 MQTT_PORT     = int(os.getenv("MQTT_PORT", "1883"))
-SUB_TOPIC     = os.getenv("MQTT_TOPIC_SENSOR_DATA", "sensors/arduino")
-PUB_TOPIC     = os.getenv("MQTT_TOPIC_ACTUATOR",    "actuator/command")
+SUB_TOPIC     = os.getenv("MQTT_TOPIC_SENSOR_DATA")
+PUB_TOPIC     = os.getenv("MQTT_COMMAND_TOPIC")
 
 WINDOW_SIZE   = 4     # must match training — 1 second at 4Hz
 N_FEATURES    = 4     # X, Y, Z, total
