@@ -6,7 +6,7 @@ from sklearn.preprocessing import StandardScaler
 import tensorflow as tf
 
 # ── Config ────────────────────────────────────────────────────────────────────
-WINDOW_SIZE = 20
+WINDOW_SIZE = 4
 N_FEATURES  = 4       # X, Y, Z, total
 EPOCHS      = 30
 BATCH_SIZE  = 16

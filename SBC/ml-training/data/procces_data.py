@@ -5,8 +5,8 @@ from pathlib import Path
 
 
 FEATURES = ["X", "Y", "Z", "total"]
-WINDOW_SIZE = 20
-STEP = 5
+WINDOW_SIZE = 4
+STEP = 2
 
 
 def load_and_label(filepath, label):
