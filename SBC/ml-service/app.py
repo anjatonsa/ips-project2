@@ -11,6 +11,7 @@ import tflite_runtime.interpreter as tflite
 # ── Config ────────────────────────────────────────────────────────────────────
 MQTT_BROKER   = os.getenv("MQTT_BROKER", "mosquitto")
 MQTT_PORT     = int(os.getenv("MQTT_PORT", "1883"))
+MQTT_TOPIC_CONFIG = os.getenv("MQTT_TOPIC_CONFIG")
 SUB_TOPIC     = os.getenv("MQTT_TOPIC_SENSOR_DATA")
 PUB_TOPIC     = os.getenv("MQTT_COMMAND_TOPIC")
 
@@ -80,12 +81,27 @@ def on_connect(client, userdata, flags, reason_code, properties):
         print(f"[ML] Connected to MQTT broker", flush=True)
         client.subscribe(SUB_TOPIC)
         print(f"[ML] Subscribed to {SUB_TOPIC}", flush=True)
+        client.subscribe(MQTT_TOPIC_CONFIG)
+        print(f"[ML] Subscribed to {MQTT_TOPIC_CONFIG}", flush=True)
+
     else:
         print(f"[ML] MQTT connection failed: {reason_code}", flush=True)
 
 def on_message(client, userdata, msg):
     global consecutive_anomalies, consecutive_normal, actuator_active
 
+    global THRESHOLD
+
+    if msg.topic == MQTT_TOPIC_CONFIG:
+        try:
+            payload = json.loads(msg.payload.decode())
+            new_threshold = float(payload.get("threshold", THRESHOLD))
+            THRESHOLD = new_threshold
+            print(f"[ML] Threshold updated to {THRESHOLD}", flush=True)
+        except Exception as e:
+            print(f"[ML] Config error: {e}", flush=True)
+        return
+    
     try:
         payload = json.loads(msg.payload.decode("utf-8"))
 
