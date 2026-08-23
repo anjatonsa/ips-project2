@@ -4,7 +4,7 @@ import pickle
 from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.preprocessing import StandardScaler
 import tensorflow as tf
-
+import json
 # ── Config ────────────────────────────────────────────────────────────────────
 WINDOW_SIZE = 4
 N_FEATURES  = 4       # X, Y, Z, total
@@ -31,9 +31,16 @@ scaler = StandardScaler()
 X_train = scaler.fit_transform(X_train.reshape(-1, N_FEATURES)).reshape(N_train, WINDOW_SIZE, N_FEATURES)
 X_test  = scaler.transform(X_test.reshape(-1, N_FEATURES)).reshape(N_test,  WINDOW_SIZE, N_FEATURES)
 
-with open("scaler.pkl", "wb") as f:
-    pickle.dump(scaler, f)
-print("Scaler saved → scaler.pkl")
+scaler_params = {
+    "mean": scaler.mean_.tolist(),
+    "scale": scaler.scale_.tolist(),
+    "n_features": int(scaler.n_features_in_)
+}
+
+with open("scaler.json", "w") as f:
+    json.dump(scaler_params, f)
+
+print("Scaler saved → scaler.json")
 
 # ── Model ─────────────────────────────────────────────────────────────────────
 model = tf.keras.Sequential([

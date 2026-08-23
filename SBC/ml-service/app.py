@@ -36,10 +36,15 @@ print(f"[ML] Input shape  : {input_details[0]['shape']}", flush=True)
 print(f"[ML] Output shape : {output_details[0]['shape']}", flush=True)
 
 # ── Load scaler ───────────────────────────────────────────────────────────────
-print("[ML] Loading scaler...", flush=True)
-with open(SCALER_PATH, "rb") as f:
-    scaler = pickle.load(f)
+with open("/app/scaler.json", "r") as f:
+    scaler_params = json.load(f)
 
+scaler_mean  = np.array(scaler_params["mean"],  dtype=np.float32)
+scaler_scale = np.array(scaler_params["scale"], dtype=np.float32)
+
+def apply_scaler(window):
+    # Replicate StandardScaler: (x - mean) / scale
+    return (window - scaler_mean) / scaler_scale
 print("[ML] Model and scaler loaded", flush=True)
 
 # ── Rolling buffer ────────────────────────────────────────────────────────────
@@ -54,9 +59,9 @@ actuator_active        = False
 
 # ── Inference ─────────────────────────────────────────────────────────────────
 def run_inference():
-    raw    = np.array(buffer, dtype=np.float32)          # (4, 4)
-    scaled = scaler.transform(raw)                        # (4, 4)
-    inp    = scaled.reshape(1, WINDOW_SIZE, N_FEATURES)   # (1, 4, 4)
+    raw    = np.array(buffer, dtype=np.float32)   # (4, 4)
+    scaled = apply_scaler(raw)                     # (4, 4)
+    inp    = scaled.reshape(1, WINDOW_SIZE, N_FEATURES).astype(np.float32)
 
     interpreter.set_tensor(input_idx, inp)
     interpreter.invoke()
@@ -92,6 +97,7 @@ def on_message(client, userdata, msg):
 
         prob  = run_inference()
         label = 1 if prob >= THRESHOLD else 0
+        print(f"[ML] raw prob={prob:.4f} buffer={list(buffer)}", flush=True)
 
         print(
             f"[ML] prob={prob:.3f} → {'VIBRATION' if label else 'normal'}",
