@@ -22,7 +22,6 @@ THRESHOLD     = 0.5   # probability above this = vibration anomaly
 MODEL_PATH    = "/app/model.tflite"
 SCALER_PATH   = "/app/scaler.json"
 
-# ── Load model ────────────────────────────────────────────────────────────────
 print("[ML] Loading TFLite model...", flush=True)
 interpreter = tflite.Interpreter(model_path=MODEL_PATH)
 interpreter.allocate_tensors()
@@ -36,7 +35,6 @@ output_idx = output_details[0]["index"]
 print(f"[ML] Input shape  : {input_details[0]['shape']}", flush=True)
 print(f"[ML] Output shape : {output_details[0]['shape']}", flush=True)
 
-# ── Load scaler ───────────────────────────────────────────────────────────────
 with open(SCALER_PATH, "r") as f:
     scaler_params = json.load(f)
 
@@ -58,7 +56,6 @@ ANOMALY_TRIGGER_COUNT  = 2   # fire actuator after this many consecutive anomaly
 NORMAL_RESET_COUNT     = 3   # reset after this many consecutive normal windows
 actuator_active        = False
 
-# ── Inference ─────────────────────────────────────────────────────────────────
 def run_inference():
     raw    = np.array(buffer, dtype=np.float32)   # (4, 4)
     scaled = apply_scaler(raw)                     # (4, 4)
@@ -68,19 +65,15 @@ def run_inference():
     interpreter.invoke()
 
     prob = float(interpreter.get_tensor(output_idx)[0][0])
-    # ── TEMPORARY DEBUG ───────────────────────────────────────
-    print(f"[DEBUG] raw input:\n{raw}", flush=True)
-    print(f"[DEBUG] scaled input:\n{scaled}", flush=True)
-    print(f"[DEBUG] prob: {prob:.4f}", flush=True)
-    # ─────────────────────────────────────────────────────────
     return prob
 
-# ── MQTT callbacks ────────────────────────────────────────────────────────────
 def on_connect(client, userdata, flags, reason_code, properties):
     if reason_code == 0:
         print(f"[ML] Connected to MQTT broker", flush=True)
+
         client.subscribe(SUB_TOPIC)
         print(f"[ML] Subscribed to {SUB_TOPIC}", flush=True)
+
         client.subscribe(MQTT_TOPIC_CONFIG)
         print(f"[ML] Subscribed to {MQTT_TOPIC_CONFIG}", flush=True)
 
@@ -117,14 +110,14 @@ def on_message(client, userdata, msg):
 
         prob  = run_inference()
         label = 1 if prob >= THRESHOLD else 0
-        print(f"[ML] raw prob={prob:.4f} buffer={list(buffer)}", flush=True)
+        print(f"Prob={prob:.4f} buffer={list(buffer)}", flush=True)
 
         print(
-            f"[ML] prob={prob:.3f} → {'VIBRATION' if label else 'normal'}",
+            f"Prob={prob:.3f} → {'movement' if label else 'normal'}",
             flush=True
         )
 
-        # ── Actuator logic ────────────────────────────────────────────────────
+        # ── Actuator logic
         if label == 1:
             consecutive_anomalies += 1
             consecutive_normal     = 0
@@ -138,13 +131,13 @@ def on_message(client, userdata, msg):
                     "confidence": round(prob, 3)
                 })
                 client.publish(PUB_TOPIC, command)
-                print(f"[ML] Anomaly confirmed — published TURN_ON to {PUB_TOPIC}", flush=True)
+                print(f"Anomaly confirmed — published TURN_ON to {PUB_TOPIC}", flush=True)
 
         else:
             consecutive_normal    += 1
             consecutive_anomalies  = 0
 
-            # Turn off actuator once vibration has clearly stopped
+            # Turn off actuator once movement has clearly stopped
             if consecutive_normal >= NORMAL_RESET_COUNT and actuator_active:
                 actuator_active = False
                 command = json.dumps({
