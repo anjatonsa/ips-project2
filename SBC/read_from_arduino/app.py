@@ -10,7 +10,7 @@ SERIAL_PORT   = os.getenv("SERIAL_PORT", "/dev/ttyACM0")
 MQTT_BROKER   = os.getenv("MQTT_BROKER")
 MQTT_PORT     = int(os.getenv("MQTT_PORT"))
 MQTT_TOPIC_SENSOR_DATA     = os.getenv("MQTT_TOPIC_SENSOR_DATA")
-MQTT_TOPIC_ACTUATOR     = os.getenv("MQTT_TOPIC_ACTUATOR")
+MQTT_COMMAND_TOPIC     = os.getenv("MQTT_COMMAND_TOPIC")
 
 print("Serial connection with Arduino...", flush=True)
 while True:
@@ -26,8 +26,8 @@ while True:
 def on_connect(client, userdata, flags, reason_code, properties):
     if reason_code == 0:
         print("[Serial-MQTT] Connected to MQTT", flush=True)
-        client.subscribe(MQTT_TOPIC_ACTUATOR)
-        print(f"[Serial-MQTT] Subscribed to {MQTT_TOPIC_ACTUATOR}", flush=True)
+        client.subscribe(MQTT_COMMAND_TOPIC)
+        print(f"[Serial-MQTT] Subscribed to {MQTT_COMMAND_TOPIC}", flush=True)
     else:
         print(f"[Serial-MQTT] MQTT connection failed: {reason_code}", flush=True)
 
