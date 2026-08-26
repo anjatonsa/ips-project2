@@ -285,5 +285,5 @@ call export_influx.py for the sample data
 call prepare_data.py script
 
 
-python  procces_data.py  ./transformed ./collected/vibration.csv 1 ./collected/regular.csv 0
+python  procces_data.py  ./transformed ./collected/movement.csv 1 ./collected/normal.csv 0
 

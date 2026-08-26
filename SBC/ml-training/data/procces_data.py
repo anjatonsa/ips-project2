@@ -4,7 +4,7 @@ import argparse
 from pathlib import Path
 
 
-FEATURES = ["X", "Y", "Z"]#, "total"]
+FEATURES = ["X", "Y", "Z"]
 WINDOW_SIZE = 4
 STEP = 2
 
@@ -86,7 +86,6 @@ def main():
     y_train = np.array(y_train_all, dtype=np.int64)
     y_test  = np.array(y_test_all,  dtype=np.int64)
 
-    # Save all four arrays
     np.save(output_dir / "X_train.npy", X_train)
     np.save(output_dir / "X_test.npy",  X_test)
     np.save(output_dir / "y_train.npy", y_train)

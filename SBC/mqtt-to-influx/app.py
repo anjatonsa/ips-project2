@@ -7,16 +7,16 @@ from influxdb_client import InfluxDBClient, Point
 from influxdb_client.client.write_api import SYNCHRONOUS
 
 MQTT_BROKER = os.getenv("MQTT_BROKER")
-MQTT_PORT = int(os.getenv("MQTT_PORT", "1883"))
+MQTT_PORT = int(os.getenv("MQTT_PORT"))
 MQTT_TOPIC_SENSOR_DATA = os.getenv("MQTT_TOPIC_SENSOR_DATA")
 
-INFLUX_URL = os.getenv("INFLUX_URL", "http://influxdb:8086")
-INFLUX_ORG = os.getenv("INFLUX_ORG", "ips")
-INFLUX_BUCKET = os.getenv("INFLUX_BUCKET", "acceleration_data")
+INFLUX_URL = os.getenv("INFLUX_URL")
+INFLUX_ORG = os.getenv("INFLUX_ORG")
+INFLUX_BUCKET = os.getenv("INFLUX_BUCKET")
 INFLUX_TOKEN = os.getenv("INFLUX_TOKEN")
 
 
-print("Starting MQTT → InfluxDB service...", flush=True)
+print("Starting MQTT to InfluxDB service...", flush=True)
 
 
 while True:
@@ -30,7 +30,7 @@ while True:
         if influx_client.ping():
             print("Connected to InfluxDB", flush=True)
             break
-
+        
         print("InfluxDB is not ready yet", flush=True)
 
     except Exception as e:
@@ -72,7 +72,7 @@ def on_message(client, userdata, msg):
                 has_fields = True
 
         if not has_fields:
-            print("No numeric fields found, skipping", flush=True)
+            print("No fields found, skipping", flush=True)
             return
 
         write_api.write(
