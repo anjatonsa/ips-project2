@@ -29,7 +29,6 @@ recent_events: deque = deque(maxlen=50)   # last 50 anomaly events
 current_threshold: float = 0.5
 latest_sensor: dict = {}
 
-# ── MQTT setup ────────────────────────────────────────────────────────────────
 mqtt_client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
 
 def on_mqtt_connect(client, userdata, flags, reason_code, properties):
