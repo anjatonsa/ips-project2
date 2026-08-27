@@ -14,7 +14,7 @@ from influxdb_client import InfluxDBClient
 MQTT_BROKER         = os.getenv("MQTT_BROKER")
 MQTT_PORT           = int(os.getenv("MQTT_PORT"))
 MQTT_TOPIC_SENSOR   = os.getenv("MQTT_TOPIC_SENSOR_DATA")
-MQTT_TOPIC_ACTUATOR = os.getenv("MQTT_TOPIC_ACTUATOR")
+MQTT_COMMAND_TOPIC = os.getenv("MQTT_COMMAND_TOPIC")
 MQTT_TOPIC_CONFIG   = os.getenv("MQTT_TOPIC_CONFIG")
 
 INFLUX_URL    = os.getenv("INFLUX_URL")
