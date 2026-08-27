@@ -11,19 +11,17 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from influxdb_client import InfluxDBClient
 
-# ── Config ────────────────────────────────────────────────────────────────────
-MQTT_BROKER         = os.getenv("MQTT_BROKER", "mosquitto")
-MQTT_PORT           = int(os.getenv("MQTT_PORT", "1883"))
-MQTT_TOPIC_SENSOR   = os.getenv("MQTT_TOPIC_SENSOR_DATA", "sensors/arduino")
-MQTT_TOPIC_ACTUATOR = os.getenv("MQTT_TOPIC_ACTUATOR",    "actuator/command")
-MQTT_TOPIC_CONFIG   = os.getenv("MQTT_TOPIC_CONFIG",      "ml/config")
+MQTT_BROKER         = os.getenv("MQTT_BROKER")
+MQTT_PORT           = int(os.getenv("MQTT_PORT"))
+MQTT_TOPIC_SENSOR   = os.getenv("MQTT_TOPIC_SENSOR_DATA")
+MQTT_TOPIC_ACTUATOR = os.getenv("MQTT_TOPIC_ACTUATOR")
+MQTT_TOPIC_CONFIG   = os.getenv("MQTT_TOPIC_CONFIG")
 
-INFLUX_URL    = os.getenv("INFLUX_URL",    "http://influxdb:8086")
+INFLUX_URL    = os.getenv("INFLUX_URL")
 INFLUX_TOKEN  = os.getenv("INFLUX_TOKEN")
-INFLUX_ORG    = os.getenv("INFLUX_ORG",    "ips")
-INFLUX_BUCKET = os.getenv("INFLUX_BUCKET", "acceleration_data")
+INFLUX_ORG    = os.getenv("INFLUX_ORG")
+INFLUX_BUCKET = os.getenv("INFLUX_BUCKET")
 
-# ── State ─────────────────────────────────────────────────────────────────────
 connected_clients: list[WebSocket] = []
 recent_events: deque = deque(maxlen=50)   # last 50 anomaly events
 current_threshold: float = 0.5
@@ -33,11 +31,11 @@ mqtt_client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
 
 def on_mqtt_connect(client, userdata, flags, reason_code, properties):
     if reason_code == 0:
-        print("[API] MQTT connected", flush=True)
+        print("MQTT connected", flush=True)
         client.subscribe(MQTT_TOPIC_SENSOR)
         client.subscribe(MQTT_TOPIC_ACTUATOR)
     else:
-        print(f"[API] MQTT failed: {reason_code}", flush=True)
+        print(f"MQTT failed: {reason_code}", flush=True)
 
 def on_mqtt_message(client, userdata, msg):
     global latest_sensor
@@ -48,7 +46,7 @@ def on_mqtt_message(client, userdata, msg):
             latest_sensor = payload
 
         elif msg.topic == MQTT_TOPIC_ACTUATOR:
-            # Anomaly event — store and broadcast to all WebSocket clients
+            # store and broadcast to all WebSocket clients
             event = {
                 "type":      "anomaly",
                 "command":   payload.get("command"),
@@ -60,12 +58,11 @@ def on_mqtt_message(client, userdata, msg):
             asyncio.run(broadcast(json.dumps(event)))
 
     except Exception as e:
-        print(f"[API] MQTT message error: {e}", flush=True)
+        print(f"MQTT message error: {e}", flush=True)
 
 mqtt_client.on_connect = on_mqtt_connect
 mqtt_client.on_message = on_mqtt_message
 
-# ── Broadcast to all WebSocket clients ────────────────────────────────────────
 async def broadcast(message: str):
     disconnected = []
     for ws in connected_clients:
@@ -76,13 +73,12 @@ async def broadcast(message: str):
     for ws in disconnected:
         connected_clients.remove(ws)
 
-# ── App lifespan ──────────────────────────────────────────────────────────────
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Connect MQTT on startup
     mqtt_client.connect(MQTT_BROKER, MQTT_PORT, 60)
     mqtt_client.loop_start()
-    print("[API] Started", flush=True)
+    print("Started", flush=True)
     yield
     mqtt_client.loop_stop()
 
@@ -94,27 +90,25 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ── WebSocket endpoint ────────────────────────────────────────────────────────
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     connected_clients.append(websocket)
-    print(f"[API] WS client connected. Total: {len(connected_clients)}", flush=True)
+    print(f"WS client connected. Total: {len(connected_clients)}", flush=True)
 
-    # Send last 10 events immediately on connect so app has context
+    # Send last 10 events immediately on connect
     for event in list(recent_events)[:10]:
         await websocket.send_text(json.dumps(event))
 
     try:
         while True:
-            # Keep connection alive — send ping every 30s
+            # Keep connection alive, ping every 30s
             await asyncio.sleep(30)
             await websocket.send_text(json.dumps({"type": "ping"}))
     except WebSocketDisconnect:
         connected_clients.remove(websocket)
-        print(f"[API] WS client disconnected. Total: {len(connected_clients)}", flush=True)
+        print(f"WS client disconnected. Total: {len(connected_clients)}", flush=True)
 
-# ── REST: sensor data from InfluxDB ──────────────────────────────────────────
 @app.get("/api/sensors")
 def get_sensors(minutes: int = 10):
     try:
@@ -139,22 +133,20 @@ def get_sensors(minutes: int = 10):
     except Exception as e:
         return {"error": str(e), "data": []}
 
-# ── REST: latest sensor reading ───────────────────────────────────────────────
 @app.get("/api/sensors/latest")
 def get_latest_sensor():
     return {"data": latest_sensor}
 
-# ── REST: recent anomaly events ───────────────────────────────────────────────
 @app.get("/api/events")
 def get_events():
     return {"events": list(recent_events)}
 
-# ── REST: current ML threshold ────────────────────────────────────────────────
+# current ML threshold
 @app.get("/api/config")
 def get_config():
     return {"threshold": current_threshold}
 
-# ── REST: update ML threshold ─────────────────────────────────────────────────
+# update ML threshold
 @app.post("/api/config/threshold")
 def set_threshold(body: dict):
     global current_threshold
@@ -168,10 +160,9 @@ def set_threshold(body: dict):
         MQTT_TOPIC_CONFIG,
         json.dumps({"threshold": current_threshold})
     )
-    print(f"[API] Threshold updated to {current_threshold}", flush=True)
+    print(f"Threshold updated to {current_threshold}", flush=True)
     return {"threshold": current_threshold}
 
-# ── REST: trigger actuator manually ──────────────────────────────────────────
 @app.post("/api/actuator")
 def control_actuator(body: dict):
     command = body.get("command", "TURN_ON")
@@ -182,10 +173,9 @@ def control_actuator(body: dict):
         MQTT_TOPIC_ACTUATOR,
         json.dumps({"command": command, "reason": "manual_app_trigger"})
     )
-    print(f"[API] Actuator command: {command}", flush=True)
+    print(f"Actuator command: {command}", flush=True)
     return {"command": command, "status": "sent"}
 
-# ── Health check ──────────────────────────────────────────────────────────────
 @app.get("/health")
 def health():
     return {"status": "ok", "timestamp": datetime.now(timezone.utc).isoformat()}

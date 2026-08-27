@@ -22,7 +22,7 @@ THRESHOLD     = 0.5   # probability above this = vibration anomaly
 MODEL_PATH    = "/app/model.tflite"
 SCALER_PATH   = "/app/scaler.json"
 
-print("[ML] Loading TFLite model...", flush=True)
+print("Loading TFLite model...", flush=True)
 interpreter = tflite.Interpreter(model_path=MODEL_PATH)
 interpreter.allocate_tensors()
 
@@ -32,8 +32,8 @@ output_details = interpreter.get_output_details()
 input_idx  = input_details[0]["index"]
 output_idx = output_details[0]["index"]
 
-print(f"[ML] Input shape  : {input_details[0]['shape']}", flush=True)
-print(f"[ML] Output shape : {output_details[0]['shape']}", flush=True)
+print(f"Input shape  : {input_details[0]['shape']}", flush=True)
+print(f"Output shape : {output_details[0]['shape']}", flush=True)
 
 with open(SCALER_PATH, "r") as f:
     scaler_params = json.load(f)
@@ -46,7 +46,6 @@ def apply_scaler(window):
     return (window - scaler_mean) / scaler_scale
 print("[ML] Model and scaler loaded", flush=True)
 
-# ── Rolling buffer ────────────────────────────────────────────────────────────
 buffer = deque(maxlen=WINDOW_SIZE)
 
 # Track consecutive anomalies to avoid spamming the actuator
@@ -57,8 +56,8 @@ NORMAL_RESET_COUNT     = 3   # reset after this many consecutive normal windows
 actuator_active        = False
 
 def run_inference():
-    raw    = np.array(buffer, dtype=np.float32)   # (4, 4)
-    scaled = apply_scaler(raw)                     # (4, 4)
+    raw    = np.array(buffer, dtype=np.float32)   
+    scaled = apply_scaler(raw)                    
     inp    = scaled.reshape(1, WINDOW_SIZE, N_FEATURES).astype(np.float32)
 
     interpreter.set_tensor(input_idx, inp)
@@ -69,16 +68,16 @@ def run_inference():
 
 def on_connect(client, userdata, flags, reason_code, properties):
     if reason_code == 0:
-        print(f"[ML] Connected to MQTT broker", flush=True)
+        print(f"Connected to MQTT broker", flush=True)
 
         client.subscribe(SUB_TOPIC)
-        print(f"[ML] Subscribed to {SUB_TOPIC}", flush=True)
+        print(f"Subscribed to {SUB_TOPIC}", flush=True)
 
         client.subscribe(MQTT_TOPIC_CONFIG)
-        print(f"[ML] Subscribed to {MQTT_TOPIC_CONFIG}", flush=True)
+        print(f"Subscribed to {MQTT_TOPIC_CONFIG}", flush=True)
 
     else:
-        print(f"[ML] MQTT connection failed: {reason_code}", flush=True)
+        print(f"MQTT connection failed: {reason_code}", flush=True)
 
 def on_message(client, userdata, msg):
     global consecutive_anomalies, consecutive_normal, actuator_active
@@ -90,9 +89,9 @@ def on_message(client, userdata, msg):
             payload = json.loads(msg.payload.decode())
             new_threshold = float(payload.get("threshold", THRESHOLD))
             THRESHOLD = new_threshold
-            print(f"[ML] Threshold updated to {THRESHOLD}", flush=True)
+            print(f"Threshold updated to {THRESHOLD}", flush=True)
         except Exception as e:
-            print(f"[ML] Config error: {e}", flush=True)
+            print(f"Config error: {e}", flush=True)
         return
     
     try:
@@ -105,7 +104,7 @@ def on_message(client, userdata, msg):
         buffer.append([x, y, z])
 
         if len(buffer) < WINDOW_SIZE:
-            print(f"[ML] Buffering {len(buffer)}/{WINDOW_SIZE}...", flush=True)
+            print(f"Buffering {len(buffer)}/{WINDOW_SIZE}...", flush=True)
             return
 
         prob  = run_inference()
@@ -117,7 +116,7 @@ def on_message(client, userdata, msg):
             flush=True
         )
 
-        # ── Actuator logic
+        # Actuator logic
         if label == 1:
             consecutive_anomalies += 1
             consecutive_normal     = 0
@@ -137,7 +136,7 @@ def on_message(client, userdata, msg):
             consecutive_normal    += 1
             consecutive_anomalies  = 0
 
-            # Turn off actuator once movement has clearly stopped
+            # Turn off actuator once movement has stopped
             if consecutive_normal >= NORMAL_RESET_COUNT and actuator_active:
                 actuator_active = False
                 command = json.dumps({
@@ -145,27 +144,25 @@ def on_message(client, userdata, msg):
                     "reason":  "vibration_stopped"
                 })
                 client.publish(PUB_TOPIC, command)
-                print(f"[ML] Vibration stopped — published TURN_OFF to {PUB_TOPIC}", flush=True)
+                print(f"Movement stopped — published TURN_OFF to {PUB_TOPIC}", flush=True)
 
     except KeyError as e:
-        print(f"[ML] Missing field in payload: {e}", flush=True)
+        print(f"Missing field in payload: {e}", flush=True)
     except Exception as e:
-        print(f"[ML] Error: {e}", flush=True)
+        print(f"Error: {e}", flush=True)
 
-# ── MQTT client setup ─────────────────────────────────────────────────────────
 client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
 client.on_connect = on_connect
 client.on_message = on_message
 
-# ── Wait for broker ───────────────────────────────────────────────────────────
 while True:
     try:
-        print(f"[ML] Connecting to {MQTT_BROKER}:{MQTT_PORT}...", flush=True)
+        print(f"Connecting to {MQTT_BROKER}:{MQTT_PORT}...", flush=True)
         client.connect(MQTT_BROKER, MQTT_PORT, keepalive=60)
         break
     except Exception as e:
-        print(f"[ML] Waiting for MQTT broker: {e}", flush=True)
+        print(f"Waiting for MQTT broker: {e}", flush=True)
         time.sleep(3)
 
-print("[ML] Starting loop...", flush=True)
+print("Starting loop...", flush=True)
 client.loop_forever()

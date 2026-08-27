@@ -8,7 +8,6 @@
 #include <Arduino_APDS9960.h>
 #include <Arduino_LSM9DS1.h>
 
-/** Audio buffers, pointers and selectors */
 typedef struct {
     signed short *buffers[2];
     unsigned char buf_select;
@@ -31,14 +30,10 @@ const unsigned long blinkInterval = 500;
 
 const int LIGHT_THRESHOLD = 120;
 
-// IMU reading interval
 unsigned long lastIMURead = 0;
 const unsigned long IMU_INTERVAL = 50;  // 20 Hz
 
 
-/**
- * @brief Arduino setup function
- */
 void setup()
 {
     Serial.begin(115200);
@@ -63,10 +58,6 @@ void setup()
         sizeof(ei_classifier_inferencing_categories[0]));
 
 
-    // ---------------------------------------------------------
-    // LED SETUP
-    // ---------------------------------------------------------
-
     pinMode(LEDB, OUTPUT);
     digitalWrite(LEDB, HIGH); // Blue LED OFF
 
@@ -76,9 +67,6 @@ void setup()
     pinMode(LEDG, OUTPUT);
     digitalWrite(LEDG, HIGH); // Green LED OFF
 
-    // ---------------------------------------------------------
-    // APDS9960 LIGHT SENSOR
-    // ---------------------------------------------------------
 
     if (!APDS.begin()) {
         Serial.println("Failed to initialize APDS9960!");
@@ -88,9 +76,6 @@ void setup()
     Serial.println("APDS9960 initialized.");
 
 
-    // ---------------------------------------------------------
-    // LSM9DS1 IMU
-    // ---------------------------------------------------------
 
     if (!IMU.begin()) {
         Serial.println("Failed to initialize LSM9DS1!");
@@ -99,10 +84,6 @@ void setup()
 
     Serial.println("LSM9DS1 IMU initialized.");
 
-
-    // ---------------------------------------------------------
-    // EDGE IMPULSE
-    // ---------------------------------------------------------
 
     run_classifier_init();
 
@@ -121,9 +102,7 @@ void setup()
 }
 
 
-/**
- * @brief Arduino main function
- */
+
 void loop()
 {
 
@@ -140,10 +119,6 @@ void loop()
             Serial.println("ACK: LED_OFF");
         }
     }
-
-    // =========================================================
-    // MICROPHONE / EDGE IMPULSE
-    // =========================================================
 
     bool m = microphone_inference_record();
 
@@ -182,10 +157,6 @@ void loop()
     }
 
 
-    // =========================================================
-    // EDGE IMPULSE PREDICTIONS
-    // =========================================================
-
     if (++print_results >=
         EI_CLASSIFIER_SLICES_PER_MODEL_WINDOW) {
 
@@ -219,15 +190,8 @@ void loop()
             );
 
 
-            // =================================================
-            // VOICE COMMANDS
-            // =================================================
 
             if (value > 0.90f) {
-
-                // -----------------------------
-                // LETS_START
-                // -----------------------------
 
                 if (strcmp(label, "Lets_start") == 0) {
 
@@ -238,10 +202,6 @@ void loop()
                     );
                 }
 
-
-                // -----------------------------
-                // FINISH
-                // -----------------------------
 
                 if (strcmp(label, "Finish") == 0) {
 
@@ -256,6 +216,11 @@ void loop()
 
                     digitalWrite(
                         LEDR,
+                        HIGH
+                    );
+
+                    digitalWrite(
+                        LEDG,
                         HIGH
                     );
 
@@ -279,23 +244,11 @@ void loop()
         print_results = 0;
     }
 
-
-    // =========================================================
-    // SENSOR READINGS
-    // =========================================================
-    // Do these AFTER the audio inference.
-    // Read them only once every 500 ms.
-
     static unsigned long lastSensorRead = 0;
 
     if (millis() - lastSensorRead >= 500) {
 
         lastSensorRead = millis();
-
-
-        // =====================================================
-        // BLUE LED BLINKING
-        // =====================================================
 
         if (blinking) {
 
@@ -319,9 +272,7 @@ void loop()
         }
 
 
-        // =====================================================
         // LIGHT SENSOR
-        // =====================================================
 
         if (blinking) {
 
@@ -365,9 +316,7 @@ void loop()
        
     }
 
-    // =====================================================
     // ACCELEROMETER
-    // =====================================================
 
     if(blinking && millis() - lastIMURead >= IMU_INTERVAL)
     {
@@ -408,9 +357,6 @@ void loop()
 }
 
 
-/**
- * @brief PDM buffer full callback
- */
 static void pdm_data_ready_inference_callback(void)
 {
     int bytesAvailable = PDM.available();
@@ -448,9 +394,6 @@ static void pdm_data_ready_inference_callback(void)
 }
 
 
-/**
- * @brief Initialize microphone inference
- */
 static bool microphone_inference_start(
     uint32_t n_samples
 )
@@ -533,10 +476,6 @@ static bool microphone_inference_start(
     return true;
 }
 
-
-/**
- * @brief Wait on new audio data
- */
 static bool microphone_inference_record(void)
 {
     bool ret = true;
@@ -565,10 +504,6 @@ static bool microphone_inference_record(void)
     return ret;
 }
 
-
-/**
- * Get raw audio signal data
- */
 static int microphone_audio_signal_get_data(
     size_t offset,
     size_t length,
@@ -589,9 +524,6 @@ static int microphone_audio_signal_get_data(
 }
 
 
-/**
- * @brief Stop PDM and release buffers
- */
 static void microphone_inference_end(void)
 {
     PDM.end();

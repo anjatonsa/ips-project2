@@ -6,30 +6,29 @@ import threading
 import serial
 import paho.mqtt.client as mqtt
 
-SERIAL_PORT   = os.getenv("SERIAL_PORT", "/dev/ttyACM0")
-MQTT_BROKER   = os.getenv("MQTT_BROKER")
-MQTT_PORT     = int(os.getenv("MQTT_PORT"))
-MQTT_TOPIC_SENSOR_DATA     = os.getenv("MQTT_TOPIC_SENSOR_DATA")
-MQTT_COMMAND_TOPIC     = os.getenv("MQTT_COMMAND_TOPIC")
+SERIAL_PORT = os.getenv("SERIAL_PORT")
+MQTT_BROKER = os.getenv("MQTT_BROKER")
+MQTT_PORT = int(os.getenv("MQTT_PORT"))
+MQTT_TOPIC_SENSOR_DATA = os.getenv("MQTT_TOPIC_SENSOR_DATA")
+MQTT_COMMAND_TOPIC = os.getenv("MQTT_COMMAND_TOPIC")
 
 print("Serial connection with Arduino...", flush=True)
 while True:
     try:
         ser = serial.Serial(SERIAL_PORT, 115200, timeout=1)
-        print(f"[Serial-MQTT] Serial port open: {SERIAL_PORT}", flush=True)
+        print(f"Serial port open: {SERIAL_PORT}", flush=True)
         break
     except Exception as e:
-        print(f"[Serial-MQTT] Waiting for serial port: {e}", flush=True)
+        print(f"Waiting for serial port: {e}", flush=True)
         time.sleep(3)
 
-# MQTT callbacks
 def on_connect(client, userdata, flags, reason_code, properties):
     if reason_code == 0:
-        print("[Serial-MQTT] Connected to MQTT", flush=True)
+        print("Connected to MQTT", flush=True)
         client.subscribe(MQTT_COMMAND_TOPIC)
-        print(f"[Serial-MQTT] Subscribed to {MQTT_COMMAND_TOPIC}", flush=True)
+        print(f"Subscribed to {MQTT_COMMAND_TOPIC}", flush=True)
     else:
-        print(f"[Serial-MQTT] MQTT connection failed: {reason_code}", flush=True)
+        print(f"MQTT connection failed: {reason_code}", flush=True)
 
 def on_message(client, userdata, msg):
     # Received actuator command from ml-service
