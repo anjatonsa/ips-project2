@@ -24,7 +24,7 @@ INFLUX_BUCKET = os.getenv("INFLUX_BUCKET")
 
 connected_clients: list[WebSocket] = []
 recent_events: deque = deque(maxlen=50)   # last 50 anomaly events
-current_threshold: float = 0.5
+current_threshold: float = 0.8
 latest_sensor: dict = {}
 
 mqtt_client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
