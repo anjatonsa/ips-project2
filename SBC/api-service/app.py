@@ -33,7 +33,7 @@ def on_mqtt_connect(client, userdata, flags, reason_code, properties):
     if reason_code == 0:
         print("MQTT connected", flush=True)
         client.subscribe(MQTT_TOPIC_SENSOR)
-        client.subscribe(MQTT_TOPIC_ACTUATOR)
+        client.subscribe(MQTT_COMMAND_TOPIC)
     else:
         print(f"MQTT failed: {reason_code}", flush=True)
 
@@ -45,7 +45,7 @@ def on_mqtt_message(client, userdata, msg):
         if msg.topic == MQTT_TOPIC_SENSOR:
             latest_sensor = payload
 
-        elif msg.topic == MQTT_TOPIC_ACTUATOR:
+        elif msg.topic == MQTT_COMMAND_TOPIC:
             # store and broadcast to all WebSocket clients
             event = {
                 "type":      "anomaly",
