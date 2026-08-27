@@ -170,7 +170,7 @@ def control_actuator(body: dict):
         return {"error": "command must be TURN_ON or TURN_OFF"}
 
     mqtt_client.publish(
-        MQTT_TOPIC_ACTUATOR,
+        MQTT_COMMAND_TOPIC,
         json.dumps({"command": command, "reason": "manual_app_trigger"})
     )
     print(f"Actuator command: {command}", flush=True)
