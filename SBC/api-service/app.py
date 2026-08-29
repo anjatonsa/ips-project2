@@ -48,7 +48,7 @@ def on_mqtt_message(client, userdata, msg):
         elif msg.topic == MQTT_COMMAND_TOPIC:
             # store and broadcast to all WebSocket clients
             event = {
-                "type":      "anomaly",
+                "type":      "movement",
                 "command":   payload.get("command"),
                 "reason":    payload.get("reason"),
                 "confidence": payload.get("confidence"),
@@ -95,10 +95,6 @@ async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     connected_clients.append(websocket)
     print(f"WS client connected. Total: {len(connected_clients)}", flush=True)
-
-    # Send last 10 events immediately on connect
-    for event in list(recent_events)[:10]:
-        await websocket.send_text(json.dumps(event))
 
     try:
         while True:

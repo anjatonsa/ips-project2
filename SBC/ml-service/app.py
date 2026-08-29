@@ -8,16 +8,15 @@ import numpy as np
 import paho.mqtt.client as mqtt
 import tflite_runtime.interpreter as tflite
 
-# ── Config ────────────────────────────────────────────────────────────────────
 MQTT_BROKER   = os.getenv("MQTT_BROKER", "mosquitto")
 MQTT_PORT     = int(os.getenv("MQTT_PORT", "1883"))
 MQTT_TOPIC_CONFIG = os.getenv("MQTT_TOPIC_CONFIG")
 SUB_TOPIC     = os.getenv("MQTT_TOPIC_SENSOR_DATA")
 PUB_TOPIC     = os.getenv("MQTT_COMMAND_TOPIC")
 
-WINDOW_SIZE   = 4     # must match training — 1 second at 4Hz
-N_FEATURES    = 3     # X, Y, Z
-THRESHOLD     = 0.8   # probability above this = vibration anomaly
+WINDOW_SIZE   = 4     
+N_FEATURES    = 3     
+THRESHOLD     = 0.8   # probability above this = movement
 
 MODEL_PATH    = "/app/model.tflite"
 SCALER_PATH   = "/app/scaler.json"
