@@ -17,7 +17,7 @@ PUB_TOPIC     = os.getenv("MQTT_COMMAND_TOPIC")
 
 WINDOW_SIZE   = 4     # must match training — 1 second at 4Hz
 N_FEATURES    = 3     # X, Y, Z
-THRESHOLD     = 0.5   # probability above this = vibration anomaly
+THRESHOLD     = 0.8   # probability above this = vibration anomaly
 
 MODEL_PATH    = "/app/model.tflite"
 SCALER_PATH   = "/app/scaler.json"

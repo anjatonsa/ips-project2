@@ -1,15 +1,12 @@
-# convert_tflite.py
 import numpy as np
 import tensorflow as tf
 
 WINDOW_SIZE = 4
 N_FEATURES  = 3   # X, Y, Z
 
-# ── Load the trained Keras model ──────────────────────────────────────────────
 model = tf.keras.models.load_model("model.keras")
 print("Model loaded → model.keras")
 
-# ── Load representative data for quantization ─────────────────────────────────
 X_train = np.load("../data/transformed/X_train.npy").astype(np.float32)
 
 def representative_dataset():
@@ -17,7 +14,6 @@ def representative_dataset():
         sample = X_train[i].reshape(1, WINDOW_SIZE, N_FEATURES)
         yield [sample]
 
-# ── Convert ───────────────────────────────────────────────────────────────────
 converter = tf.lite.TFLiteConverter.from_keras_model(model)
 
 converter.optimizations = [tf.lite.Optimize.DEFAULT]
@@ -28,14 +24,12 @@ converter.inference_output_type = tf.float32
 
 tflite_model = converter.convert()
 
-# ── Save ──────────────────────────────────────────────────────────────────────
 with open("model.tflite", "wb") as f:
     f.write(tflite_model)
 
 size_kb = len(tflite_model) / 1024
 print(f"model.tflite saved — size: {size_kb:.1f} KB")
 
-# ── Verify ────────────────────────────────────────────────────────────────────
 print("\nVerifying TFLite model...")
 
 interpreter = tf.lite.Interpreter(model_path="model.tflite")
@@ -44,10 +38,9 @@ interpreter.allocate_tensors()
 input_details  = interpreter.get_input_details()
 output_details = interpreter.get_output_details()
 
-print(f"Input shape  : {input_details[0]['shape']}")   # should be [1, 4, 3]
-print(f"Output shape : {output_details[0]['shape']}")  # should be [1, 1]
+print(f"Input shape  : {input_details[0]['shape']}")   
+print(f"Output shape : {output_details[0]['shape']}")
 
-# ── Test inference ────────────────────────────────────────────────────────────
 test_input = X_train[0].reshape(1, WINDOW_SIZE, N_FEATURES)
 interpreter.set_tensor(input_details[0]['index'], test_input)
 interpreter.invoke()
