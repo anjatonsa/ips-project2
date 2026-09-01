@@ -41,7 +41,6 @@ scaler_mean  = np.array(scaler_params["mean"],  dtype=np.float32)
 scaler_scale = np.array(scaler_params["scale"], dtype=np.float32)
 
 def apply_scaler(window):
-    # Replicate StandardScaler: (x - mean) / scale
     return (window - scaler_mean) / scaler_scale
 print("[ML] Model and scaler loaded", flush=True)
 

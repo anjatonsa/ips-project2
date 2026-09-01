@@ -23,7 +23,7 @@ INFLUX_ORG    = os.getenv("INFLUX_ORG")
 INFLUX_BUCKET = os.getenv("INFLUX_BUCKET")
 
 connected_clients: list[WebSocket] = []
-recent_events: deque = deque(maxlen=50)   # last 50 anomaly events
+recent_events: deque = deque(maxlen=50)   
 current_threshold: float = 0.8
 latest_sensor: dict = {}
 
@@ -75,7 +75,6 @@ async def broadcast(message: str):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Connect MQTT on startup
     mqtt_client.connect(MQTT_BROKER, MQTT_PORT, 60)
     mqtt_client.loop_start()
     print("Started", flush=True)
