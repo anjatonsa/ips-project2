@@ -1,4 +1,4 @@
-# IoT System for Voice Control and ML-Based Vibration Detection
+# IoT System for Voice Control and ML-Based Movement Detection
 
 IoT system developed using **Arduino Nano 33 BLE Sense Lite** and **Raspberry Pi** for voice-activated sensor monitoring and machine-learning-based movement detection.
 
